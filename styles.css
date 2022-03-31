@@ -1,0 +1,10 @@
+/* video 00:30 dodajemo stli da prekrizimo text kada oznacimo checkbox da je prazan.*/
+input[type="checkbox"]:checked + label {
+  text-decoration: line-through;
+}
+/* kod ovog stila moramo paziti da je u htmlu labela NAKON inputa posto mozemo traziti samo sljedeceg susjeda a ne prethodnog
+u slucaju da bas moramo imati obrnuti redosljed onda bi morali preko flexboxa stavidi flex-direction : row-reverse
+*/
+body {
+  margin: 30px;
+}
