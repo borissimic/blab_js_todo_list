@@ -1,0 +1,249 @@
+Danas cemo malo optimizirati aplikaciju i necemo nista novo dodavati 
+Video 03:00 sada cemo "razbiti" nas js file u vise fileova da bude lijepsi kod.
+Obicno se to radi da napravimo novi folder i da ga imenujemo po nekoj funkcijonalnosti . U ovom slucaju napravili smo folder i nazvali ga todo.
+_______________________________________________________________________________
+na 04:30 pricamo o ekstenziji za ikone 
+_______________________________________________________________________________
+Video 05:00 pricamo o imenovanjima filevoa unutar todo foldera i zakljucili smo da radije imamo 100 fileova sa 5 linija koda nego 1 sa 500 i sada smo zakljucili da svaki file ima neku svoju funkcionalnost i posto nam u prvi file u ovo slucaju idu klase ili  factory funkcije onda smo odlucili da se nazove model.js 
+iz originalno filea smo iscupali
+class Todo {
+  text;
+  isDone;
+
+  constructor(text, isDone = false) {
+    this.text = text;
+    this.isDone = isDone;
+  }
+}
+ i to smo spremili u file todo.model.js  i sada nakon sto smo to spremili moramo naci nacin kako da recemo script.js da nam izvuce Todo iz filea todo.model.js.
+
+To radimo na nacin da da koristimo slicno kao i u css-u import .
+kada prilikom importanja se spominje modul pod time mislimo na neki odvojeni file.
+u slucju kod viticastih zagrada koje imamo unutar import komande js nam kaze da ce taj modul gledati kao objekt a onda u principu unutar tih zagrada mi vracamo property od tog objekta .
+
+U js-u mi moramo reci explicitno unutar file-a sta zelimo da nam bude dostupno van tog istog file-a i to radimo s kljucnom rijeci export.
+
+sada se postavlja pitanje : Nama je Todo u ovom slucaju objekt a mi smo unutar {} izvukli taj Todo kao property .  To se u programiranju naziva reveling module pattern koji kaze da svaki file mozemo smatrati kao zatvorenu cijelinu i nitko mu ne moze pristupiti osim ako mi to eksplicitno kazemo odnosno revelamo te njegove dijelove.
+
+i sada kada smo odradili export iz todo.model.js i import u script.js javlja nam se error cannot use import statment  i to rijesavamo na nacin da u HTML script tagu za js dodamo type="module".
+_______________________________________________________________________________
+video 17:41 iz Todo clase smo izbrisali  2 propertya i dobili smo 
+  export class Todo {
+  constructor(text, isDone = false) {
+    this.text = text;
+    this.isDone = isDone;
+  }
+}
+
+ovo nam nije bacilo nikakv error iz razloga sta nismo definirali nikakve vrijednosti unutar tih property-a i posto smo unutar constructor-a stavili this.text = text ; on nam automatski "kreira" varijablu text na razini te clase.
+_______________________________________________________________________________
+Video 19:16 sada idemo viditi sta mozemo sa funckijom addNewTodo koju smo napravili da je samostojeca . to znaci da je ona pure function posto ona ne poziva nista van sebe tj ne utjece na niti jednu varijablu koja se nalazi van nje vec samo prima odredjene parametre i vraca uvijek isti rezultat kada joj prosljedimo iste parametre.  i sada smo zakljucili da i nju mozemo maknuti u novi file.
+
+Tu funkciju smo izvukli u file koji smo nazvali todo.service.js posto se u modernom js-u takve funkcije nazivaju service odnosno usluzne funkcije. i nju takodjer trebamo exportati iz tog file-a u script.js i kada je importamo unutar {} stavljamo samo referencu na tu funkciju.
+
+Sljedeci korak je da popravimo todos.forEach iz kojeg smo vadili todo i i i to slali funckiji addNewTodo.  i to popravimo na nacin da smo metodi todos.forEach
+prosljedili referencu na funkciju addNewtodo <-  prosljedimo bez zagrada () tj ne pozivamo tu funkciju.
+ 
+ Prije : todos.forEach((todo, i) => addNewTodo(todo, i));
+
+ Poslije : todos.forEach(addNewTodo);
+_______________________________________________________________________________
+Video 26:00 sad pricamo o tome da ukoliko imamo vise fileova iz mape todo bi trebali imati svaki put kad importamo novu  liniju koda , no postoji jedna stvar kako mozemo to skratiti na nacin da napravimo file index.js pritom pazeci da se on naziva bas index.js.
+
+unutar njega pisemo : 
+export * from "./todo.model.js
+ 
+to nam govori da exportamo sve iz tog file-a i onda u script.js mi mozemo umjesto da importamo iz svakog file-a posebno staviti da nam importa iz index.js a onda unutar {} dodamo samo propertye koje smo imali prije u drugim linijama koda 
+
+prije : 
+import { Todo } from "./todo/todo.model.js";
+import { addNewTodo } from "./todo/todo.service.js";
+
+Poslije: import { Todo,addNewTodo } from "./todo/index.js";
+ovakav tip filea kao sto je index.js naziva se "barrel" file.
+_______________________________________________________________________________
+video 30:27 idemo optimizirati const imput value kod koje smo provjeravali dali nam ima value-a unutar input elmenta i zato smo koristili ? 
+
+to smo rijesili prvo na nacin da smo unutar input taga  u html-u dodali i required pa nam on sada vraca obavjest da unesemo tu texst.
+
+na taj naci  smo sigurni da nam ukoliko nema teksta nece ulaziti u tu funkciju i zato mozemo maknuti ?  i if uvjet.
+
+Prije:   const inputValue = todoForm.querySelector("input")?.value;
+  if (!inputValue) {
+    return;
+  }
+
+  Poslije:   const inputValue = todoForm.querySelector("input").value;
+  
+  _____________________________________________________________________________
+
+ Video 33:00 sada imamo jos jedan problem a to je da nam kada dodajemo novi todo on ide jedan ispod drugoga a mi bi smo htjeli da nam on ide na vrh a to ce mo rijesiti na nacin da unutar funckije addNewTodo kod dijela da nam ubaci novi child umjesto append.child koristimo prepend.
+
+ Prije :  
+   const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+  document.querySelector("main").appendChild(divElement);
+}
+
+Poslije :   const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+  document.querySelector("main").prepend(divElement);
+}
+______________________________________________________________________________
+
+Video 36:31 sad cemo ici jos malo pojednostavniti template string koji se nalazi unutar divElement.innerHTML a to ce mo rijesti da template string iz funkcije izbacimo u zasebnu funkciju unutar todo.service.js filea.
+
+Prije : 
+  divElement.innerHTML = `
+<input type="checkbox" name="checkbox-${i}" id="checkbox-${i}"/>
+<label for="checkbox-${i}">${text}</label>
+`;
+
+Poslije : 
+divElement.innerHTML =getTodoTemplate(text,i);
+
+function getTodoTemplate(text, i) {
+  return `
+ <input type="checkbox" name="checkbox-${i}" id="checkbox-${i}"/>
+ <label for="checkbox-${i}">${text}</label>
+ `;
+}
+
+ovu funkciju mozemo dodatno smanjiti i preko arrow funkcije kojoj ukoliko vraca samo jednu vrijednost mi mozemo maknuti return i dobiti malo lijepsu funkciju .
+
+Prije : 
+function getTodoTemplate(text, i) {
+  return `
+ <input type="checkbox" name="checkbox-${i}" id="checkbox-${i}"/>
+ <label for="checkbox-${i}">${text}</label>
+ `;
+}
+ Poslije : 
+ const  getTodoTemplate= (text, i) =>  `
+ <input type="checkbox" name="checkbox-${i}" id="checkbox-${i}"/>
+ <label for="checkbox-${i}">${text}</label>
+ `;
+  
+  U slucaju da u file-u imamo funkciju koju necemo exposat nigdi tj koju cemo koristiti samo u tom fileu mozemo je prefixati s _
+_______________________________________________________________________________
+
+Video 45:50 sada idemo rijesiti todos listu tj da maknemo const todos u kojem inace samo imamo dva primjera  da bi smo mogli slati koji ce nam sljedeci index biti kad napravimo novi todo. To cemo rijesiti da unutar funkcije addNewTodo dodamo const todoElements i onda stavimo document.querySelectorAll("main>div") i onda posto ce nam sad ovo vracati niz mi moramo pronaci zadnji clan tog niza a za to cemo dodati const lastTodoElement i unutar nje ce mo staviti todoElements[todoElements.lenght-1]
+Posto ce nam const lastTodoElement vracati undefined jer je taj niz inicijalno prazan moramo dodati i const i koja ce nam provjeriti dali postoji index i ukoliko postoji da ga stavi a ukoliko ga nemamo da stavimo vrijednost 0
+
+Prije:
+export function addNewTodo({ text, isDone }, i) {
+  const divElement = document.createElement("div");
+  divElement.innerHTML = _getTodoTemplate(text, i);
+
+  const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+
+  document.querySelector("main").prepend(divElement);
+}
+
+Poslije:
+export function addNewTodo({ text, isDone }) {
+  const todoElements = document.querySelectorAll("main > div");
+  const lastTodoElement = todoElements[todoElements.length - 1];
+  console.log(lastTodoElement);
+  const i = todoElements.length ? todoElements.length : 0;
+  const divElement = document.createElement("div");
+  divElement.innerHTML = _getTodoTemplate(text, i);
+
+  const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+
+  document.querySelector("main").prepend(divElement);
+}
+
+const i = todoElements.length ? todoElements.length : 0;  jos mozemo skratiti  posto ima dva uvjeta koja se ponavljaju mozemo koristi i || operator.
+
+Prije : 
+const i = todoElements.length ? todoElements.length : 0;
+
+Poslije : 
+const i = todoElements.length ||: 0;
+
+Takodjer nakon sta smo dodali const i  mozemo izbrisiati const lastTodoElement.
+
+_______________________________________________________________________________
+
+Video 1:20:00  sada bi smo volili da izbrisemo Primjer1 i Primjer2 i da kada osvjezimo stranicu ne izgubimo podatke tj todo-ve koje smo unjeli na stranicu.
+
+Za ovakve stvari ukoliko nemamo backend ove stvari se spremaju u Local stroreagu.
+Local storage u brosweru se nalazi kada inspectamo stranicu i onda u izborniku di je Elements , Console itd.  izaberemo Application i onda unutar Aplication imamo local storage.
+
+Video 1:22:01 sada vidimo kako mozemo dodati nesto u Local Storage.
+
+U scrip.js upisemo komandu localstorage.getItem("") i onda unutar "" napisemo key koji smo unili u local storage u slucaju da smo rucno unosili key i value.
+
+sada ce mo postaviti to preko JS-a (video 1:24:50):
+
+U script.js prvo kreiramo localstorage.setItem("key" , "value").
+
+Obicno bi bila praksa da se key u local storageu naziva velikim slovima.
+
+nakon toga odma kreiramo i localstorage.getItem("key") koji mozemo spremiti u varijablu . u ovom slucaju nazvali smo je ls
+
+Prvi problem na koji nailazimo je to kada spremamo niz nama se u local storageu pojavulje key name  i value  [object , object]
+
+To se dogodilo zato sto setItem ocekuje da mu je key string i da mu je i value takodjer string sta u ovo slucaju nije .
+To se rijesav na naicn da unutar setItema na mjesto gdje ide value stavljamo 
+JSON.stringify(i onda value tj u ovom slucaju ime varijable gdje je spremljen niz) . na ovaj nacin smo value spremili u local storage kao string.
+
+To nas dovodi do drugo problema a to je da sada moramo iz local storagea to vratiti kao niz. To radimo s JSON.parse
+
+Primjer : 
+localStorage.setItem("TODOS", JSON.stringify(todos));
+const localStorageTodos = JSON.parse(localStorage.getItem("TODOS"));.
+
+Sada smo odlucili da se rijesimo todos tj da ne zelimo da se rucno kreira svaki novi todo unutar js-a . Tj mi zelimo da nam je todo lista prazna i da svaki put kada upisemo novi todo da nam ga doda na listu i da ga spremi u local storage
+
+Nakon sto smo makniuli const todos i zakomentirali 
+localStorage.setItem("TODOS", JSON.stringify(todos));  dolazimo do errora koji kaze cannot read properties of null (reading forEach).
+
+Taj error rijesavamo na nacin da dodamo if uvjet kojem ce mo prosljediti localStorageTodos i ukoliko on postoji da nam spremi novi todo.
+
+Primjer : 
+const localStorageTodos = JSON.parse(localStorage.getItem("TODOS"));
+if (localStorageTodos) {
+  localStorageTodos.forEach(addNewTodo);
+}
+
+Ovo sada nama vizualno izgleda da radi ali ga i dalje nemamo u local storageu a to rijesimo da udjemo unutar metode addNewTodo i da tamo kazemo da nakon kreiranja novog todo-a da nam ga spremi su local storage.
+
+Ono sto bi smo htjeli izbjeci je to da nam  se priliko kreiranja svakog novog todo-a sprema poseban key tj da svaki novi todo ima svoj posebni key i value  , nego bi smo htjeli kada kreiramo novi todo da nam se njegov value sprema unutar zajednickog key-a .
+
+To se rijesava na nacin da unutar metode addNewTodo napravimo const todos u koju prosljedimo document.querySelectorAll("main > div") ,  no u slucaju da danas sutra zelimo mozda taj div preimenovati u npr. article bilo bi pametnije da mu dodjelimo klasu sto mozemo napraviti na nacin 
+divElement.classList.add("todo")
+
+Ukoliko nam kod niza pise da je to nodelist of elements moramo koristiti spread [...] da bi smo mogli koristiti map metodu
+ 
+ Finalno rjesenje .
+
+ Unutar script.js : 
+ const localStorageTodos = JSON.parse(localStorage.getItem("TODOS"));
+ if (localStorageTodos) {
+  localStorageTodos.forEach(addNewTodo);
+}
+
+
+Unutar metode addNewTodo :
+
+ const todosElements = document.querySelectorAll(".todo");
+  const realTodos = [...todosElements].map((todoElement) => {
+    const text = todoElement.querySelector("label").innerText;
+    const isDone = todoElement.querySelector("input").checked;
+    return new Todo(text, isDone);
+  });
+
+  localStorage.setItem("TODOS", JSON.stringify(realTodos));
+
+
+Video 1:54:50  sada imamo jos jedan probleme a to  je da kada dodamo novi todo i on se uredno spremi u local storage nakon sto refreshamo stranicu poremeti nam se redosljed svih dosadanjih todo-a .
+to se dogadja zbog prependa koji nam prvo iscita sve iz niza i onda doda novog clana na vrh i to je onda problem .
+
+To rijesavamo da na tamo di dohvacamo taj todo da bi ga spremili u local storage dodamo  .reverse
+
+Primjer :
+const realTodos = [...todosElements].reverse().map((todoElement) => {

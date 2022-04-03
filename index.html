@@ -6,32 +6,18 @@
  <meta http-equiv="X-UA-Compatible" content="IE=edge">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  <title>TODO</title>
- <script defer src="./script.js"></script>
+ <script defer type="module" src="./script.js"></script>
  <link rel="stylesheet" href="./styles.css">
 </head>
 
 <body>
- <form id="todo-form" name="todo-form">
-  <!-- na 41:00 sada idemo napraviti kako dodati novi todo i prikazati ga na todo listi
-  na 43 :00 smo dodali button "dodaj " ali on nema jos nikakvu funkciju 
- ovo mozemo na 2 nacina a to je da dodamo eventListner na button pa da kad kliknemo na dodaj on doda to na listu ili da napravimo form element i onda kad stisnemo button ili enter da nam submita tu formu. odlucili smo ici na nacin da nam i enter i click na button rade video 54:00-->
+ <form name="todo-form">
   <label for="new-todo">Dodaj todo :</label>
-  <input type="text" name="new-todo" id="new-todo">
+  <input type="text" name="new-todo" id="new-todo" required>
   <button>Dodaj</button>
  </form>
- <main>
-  <!-- u videu na 20:00 smo izbrisali tesnte primjekerke div elemenenata iz htmla i dodali smo ovaj main element i promjenili u js-u unutra todos.forEach metode to da nam sada ovaj element main appenda child divElement u sebe -->
- </main>
- <!-- prvo radimo primjer kako izgleda checkbox za todo i text pored video 06:42  -->
- <!-- <div>
-  <input type="checkbox" name="checkbox-1" id="checkbox-1">
-  <label for="checkbox-1">Primjer 1</label>
- </div> -->
- <!-- sada smo dodali i drugi primjer ali imamo problem posto su ista imena i kad  kliknenomo na labelu od drugog checka nam prvi to je zbog toga sta labela trazi prvi primjer tj krece od vrha i trazi checkbox s imenom checkbox i kad nadje prvi onda njega checka .To smo rijesili tako da smo dodlli nastavak -2 na id od inputa i u for od labele 09:13 ,  u videu na 20:00 brisemo ovaj dio  -->
- <!-- <div>
-  <input type="checkbox" name="checkbox-2" id="checkbox-2">
-  <label for="checkbox-2">Primjer 2</label>
- </div> -->
+ <main></main>
+ </div>
 </body>
 
 </html>
