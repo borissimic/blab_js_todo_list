@@ -1,0 +1,203 @@
+Video 10:37 sada nastavljamo s naism todo-m i imamo prvi problem a to je da kada checkamo todo da je gotov i onda refreshamo stranicu on nam i dalje ostane na listi i sada bi smo htjeli da ukoliko nesto promjenimo da na automatski azurira local storage.
+
+To rijesavamo na nacin da "slusamo" kada se promjeni chekcbox da azuriramo local storage.
+
+Prije : 
+const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+
+Poslije: 
+ const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+  inputElement.addEventListener("click", () => {
+    const todosElements = document.querySelectorAll(".todo");
+    const realTodos = [...todosElements].reverse().map((todoElement) => {
+      const text = todoElement.querySelector("label").innerText;
+      const isDone = todoElement.querySelector("input").checked;
+      return new Todo(text, isDone);
+    });
+
+    localStorage.setItem("TODOS", JSON.stringify(realTodos));
+  });
+ 
+  ovaj problem smo rijesili na  nacin da smo samo  unutar eventListenera kopirali to da kada se kreira novi todo da ga spremi u local storage  i na taj nacin smo dobili refresh local storage-a.
+
+  novi problem je to sto na 2 mjesta u nasem kodu imamo isti blok koda pa bi mozda bilo pametnije da ga probamo smanjiti na nacin da ce mo 
+  napraviti vanjsku funkciju
+
+  Prije : 
+  const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+  inputElement.addEventListener("click", () => {
+    const todosElements = document.querySelectorAll(".todo");
+    const realTodos = [...todosElements].reverse().map((todoElement) => {
+      const text = todoElement.querySelector("label").innerText;
+      const isDone = todoElement.querySelector("input").checked;
+      return new Todo(text, isDone);
+    });
+
+    localStorage.setItem("TODOS", JSON.stringify(realTodos));
+  });
+
+  Poslije : 
+  function saveToLocalStorage() {
+  const todosElements = document.querySelectorAll(".todo");
+  const realTodos = [...todosElements].reverse().map((todoElement) => {
+    const text = todoElement.querySelector("label").innerText;
+    const isDone = todoElement.querySelector("input").checked;
+    return new Todo(text, isDone);
+  });
+
+  localStorage.setItem("TODOS", JSON.stringify(realTodos));
+}
+
+i onda ovu povise funkciju samo trebamo pozvati unutar inputElement-a 
+
+ const inputElement = divElement.querySelector("input");
+  inputElement.checked = isDone;
+  inputElement.addEventListener("click", () => saveToLocalStorage());
+ 
+  napomena : Umjesto event-a click mogli smo koristi i change koji nam kaze da kada se neko stanje promjeni da onda izvrsi sta treba
+
+  ______________________________________________________________________________________
+
+  Dalje sto bi smo mogli skratiti je to da na 2 mjesta pozivamo document.querySelectorAll(.todo)
+
+  i onda mozemo const todoElements izvuci van scope-a funkcije addNewTodo  i  unutar scopea funkcije saveToLocalStorage izbrisati const todosElements i promjeniti u vrijednosti const realTodos  u [...todoElements].
+
+  Sada nailazimo na problem da nam se prilikom stvaranja todo-a u local storage sprema prazan niz i to sada moramo rijesiti na nacin da  const todoElements pretvorimo u arrow funkciju i da je pozivamo svaki put kada kreiramo novi todo.
+
+  Prije : 
+  const todoElements = document.querySelectorAll(".todo");
+
+  Poslije : 
+  const _todoElements = () =>  document.querySelectorAll(".todo");
+
+i sada tu funkciju dodajemo u addNewTodo funkciju za pronalazenje indexa preko 
+const i = _todoElements().length || 0
+
+i takodjer kod funkcije saveToLocalStorage.
+
+Dodatno smo jos mogli unutar saveToLocalStorage funkcije izdovjiti const realTodos koji nam  prihvaca sve nizove od todo elemenata i onda ih reversa i mapira i onda to sprema  
+izdvojiti u novu funkciju.
+
+Prije : 
+function saveToLocalStorage(todoElements) {
+  //const todosElements = document.querySelectorAll(".todo");
+  const realTodos = [...todoElements].reverse().map((todoElement) => {
+    const text = todoElement.querySelector("label").innerText;
+    const isDone = todoElement.querySelector("input").checked;
+    return new Todo(text, isDone);
+  });
+
+  localStorage.setItem("TODOS", JSON.stringify(realTodos));
+}
+
+Poslije: 
+function saveToLocalStorage(todoElements) {
+  //const todosElements = document.querySelectorAll(".todo");
+  localStorage.setItem("TODOS", JSON.stringify(getAllTodos(todoElements)));
+}
+
+function getAllTodos(todoElements) {
+  return [...todoElements].reverse().map((todoElement) => {
+    const text = todoElement.querySelector("label").innerText;
+    const isDone = todoElement.querySelector("input").checked;
+    return new Todo(text, isDone);
+  });
+}
+
+i sada kako imamo funkciju getAllTodos koja u svom body-u nemam nista osim returna mozemo i to srediti na nacin da je stavimo u arrow funkciju.
+
+const getAllTodos = (todoElements) => 
+  [...todoElements].reverse().map((todoElement) => {
+    const text = todoElement.querySelector("label").innerText;
+    const isDone = todoElement.querySelector("input").checked;
+    return new Todo(text, isDone);
+  });
+}
+
+Da bi smo bili jos vise konzistenti praksa je da sve funkcije koje nisu exportane pisemo na vrhu file-a i da ih prefixamo sa _
+
+_________________________________________________________________________
+Video 42:00 sada cemo viditi sta cemo sa local storage key name u ovo slucaju to je "TODOS"  koji nam  moze biti primjer jedne konstante tj jednom kada se postavi vise ga nebi trebali mjenjat i sluzi samo za citanje .
+
+Napravili smo novi file todo.constants.js i u njemu const TODO_LOCAL_STORAGE_KEY = "TODOS" i onda smo exportali tu const.
+
+U nazivu smo koristili sve velika slova i underscore a ne camel Case iz razloga toga sto je ovo bas Konstanta !
+
+_________________________________________________________________________
+
+Video 1:00:00 sada ce mo dodati i button koji ce nam brisati svaku stavku s todo liste  koji cemo malo srediti na nacin da cemo potraziti html entitiy remove icon
+
+Za pocetak cemo unutar _getTodoTemplate-a dodati button 
+
+Prije : 
+const _getTodoTemplate = (text, i) => `
+<input type="checkbox" name="checkbox-${i}" id="checkbox-${i}" />
+<label for="checkbox-${i}">${text}</label>
+`;
+
+Poslije : 
+const _getTodoTemplate = (text, i) => `
+<input type="checkbox" name="checkbox-${i}" id="checkbox-${i}" />
+<label for="checkbox-${i}">${text}</label>
+<button>&#10005;</button>
+`;
+
+zatim bi trebali reci da kada kliknemo taj button da ma makne taj todo.
+a to radimo na nacin da unutar funkcije addNewtodo dodamo const buttonElement koji nam selecta iz divElementa "button" i onda na taj buttonElement dodajemo addEventListener koji nam na click mice taj todo i da nam spremi promjenu u local storage.
+
+Primjer : 
+  const buttonElement = divElement.querySelector("button");
+  buttonElement.addEventListener("click", () => {
+    divElement.remove();
+    _saveToLocalStorage(_todoElements());
+  });
+_________________________________________________________________________
+
+Video 1:08:00  Sljedeci zadatk nam je da napravimo button koji ce micati sve todove koji su gotovi. 
+
+Za pocetak ce mo unutar HTML-a dodati button koji ima id = "remove-done" i text Obrisi sve gotove.
+
+Rijesenje broj 1 : 
+
+const deleteDoneButton = document.getElementById("remove-done");
+deleteDoneButton.addEventListener("click", () => {
+  getTodoElements().forEach((todoElement) => {
+    const isChecked = todoElement.querySelector("input").checked;
+    if (isChecked) {
+      todoElement.remove();
+    }
+  });
+  saveToLocalStorage(getTodoElements());
+});
+
+Rijesenje br 2 : 
+
+const deleteDoneButton = document.getElementById("remove-done");
+deleteDoneButton.addEventListener("click", () => {
+  getTodoElements()
+    .filter((todoElement) => todoElement.querySelector("input").checked)
+    .forEach((todoElement) => todoElement.remove());
+  saveToLocalStorage(getTodoElements());
+});
+_______________________________________________________________________________________________________
+
+video 1:45:00  
+
+dodavanje  js metoda od browsera .
+
+Alert kada god kliknemo na button on ce nas pitati dali smo sigurni i tek ce se onda izbrisati i spremiti u local storage. u Alert saljemo samo tekst i on je samo obavjest koja kad nam se javi mi nemamo nikakvu drugu opciju osim ok unutar njegog prozora.
+
+Confirm je funkcija koja prima string a vraca boolean . tj  kada u primjeru kliknemo na buton x Confirm ce nas pitati dali smo sigurni ili zelimo cancel no medjutim i kad stisnemo cancel on nam opet izbrise taj todo pa onda moramo ga staviti u if uvjet.
+
+Primjer :
+ const buttonElement = divElement.querySelector("button");
+  buttonElement.addEventListener("click", () => {
+    if (confirm("jesi li siguran?")) {
+      divElement.remove();
+      saveToLocalStorage(getTodoElements());
+    }
+  });
+_______________________________________________________________________________________________________________

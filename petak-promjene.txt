@@ -48,7 +48,7 @@ prosljedili referencu na funkciju addNewtodo <-  prosljedimo bez zagrada () tj n
 
  Poslije : todos.forEach(addNewTodo);
 _______________________________________________________________________________
-Video 26:00 sad pricamo o tome da ukoliko imamo vise fileova iz mape todo bi trebali imati svaki put kad importamo novu  liniju koda , no postoji jedna stvar kako mozemo to skratiti na nacin da napravimo file index.js pritom pazeci da se on naziva bas index.js.
+Video 26:00 sad pricamo o tome da ukoliko imamo vise fileova iz mape todo bi trebali imati svaki put kad importamo file novu  liniju koda , no postoji jedna stvar kako mozemo to skratiti na nacin da napravimo file index.js pritom pazeci da se on naziva bas index.js.
 
 unutar njega pisemo : 
 export * from "./todo.model.js

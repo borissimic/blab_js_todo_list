@@ -1,7 +1,14 @@
-import { Todo, addNewTodo } from "./todo/index.js";
+import {
+  Todo,
+  addNewTodo,
+  TODO_LOCAL_STORAGE_KEY,
+  getTodoElements,
+  saveToLocalStorage,
+} from "./todo/index.js";
 
-// localStorage.setItem("TODOS", JSON.stringify(todos));
-const localStorageTodos = JSON.parse(localStorage.getItem("TODOS"));
+const localStorageTodos = JSON.parse(
+  localStorage.getItem(TODO_LOCAL_STORAGE_KEY)
+);
 if (localStorageTodos) {
   [...localStorageTodos].forEach(addNewTodo);
 }
@@ -14,4 +21,11 @@ todoForm.addEventListener("submit", (event) => {
   const newTodo = new Todo(inputValue);
   addNewTodo(newTodo);
   todoForm.reset();
+});
+const deleteDoneButton = document.getElementById("remove-done");
+deleteDoneButton.addEventListener("click", () => {
+  getTodoElements()
+    .filter((todoElement) => todoElement.querySelector("input").checked)
+    .forEach((todoElement) => todoElement.remove());
+  saveToLocalStorage(getTodoElements());
 });
