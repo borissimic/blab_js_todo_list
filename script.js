@@ -22,10 +22,14 @@ todoForm.addEventListener("submit", (event) => {
   addNewTodo(newTodo);
   todoForm.reset();
 });
+
+const _getAllDoneTodoElements = () =>
+  getTodoElements().filter(
+    (todoElement) => todoElement.querySelector("input").checked
+  );
+
 const deleteDoneButton = document.getElementById("remove-done");
 deleteDoneButton.addEventListener("click", () => {
-  getTodoElements()
-    .filter((todoElement) => todoElement.querySelector("input").checked)
-    .forEach((todoElement) => todoElement.remove());
+  _getAllDoneTodoElements().forEach((todoElement) => todoElement.remove());
   saveToLocalStorage(getTodoElements());
 });
