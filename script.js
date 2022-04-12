@@ -1,35 +1,37 @@
 import {
-  Todo,
   addNewTodo,
-  TODO_LOCAL_STORAGE_KEY,
   getTodoElements,
-  saveToLocalStorage,
+  getTodos,
+  postTodo,
+  deleteTodo,
 } from "./todo/index.js";
 
-const localStorageTodos = JSON.parse(
-  localStorage.getItem(TODO_LOCAL_STORAGE_KEY)
-);
-if (localStorageTodos) {
-  [...localStorageTodos].forEach(addNewTodo);
-}
+const todos = await getTodos();
 
+if (todos) {
+  [...todos].forEach(addNewTodo);
+}
+// dodavanje novog todo-a
 const todoForm = document.forms.namedItem("todo-form");
 todoForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  const inputValue = todoForm.querySelector("input").value;
-  const newTodo = new Todo(inputValue);
-  addNewTodo(newTodo);
+  const title = todoForm.querySelector("input").value;
+
+  postTodo(title).then(addNewTodo);
   todoForm.reset();
 });
-
+//klikom na button "obrisi sve odabrane bi se trebali ukloniti svi todo-vi koji su "gotovi"i update local storage
 const _getAllDoneTodoElements = () =>
   getTodoElements().filter(
     (todoElement) => todoElement.querySelector("input").checked
   );
 
-const deleteDoneButton = document.getElementById("remove-done");
-deleteDoneButton.addEventListener("click", () => {
+document.getElementById("remove-done").addEventListener("click", async () => {
+  const todos = await getTodos();
+
+  todos.forEach(({ id }) => deleteTodo(id));
+
   _getAllDoneTodoElements().forEach((todoElement) => todoElement.remove());
-  saveToLocalStorage(getTodoElements());
 });
+///Editanje teksta/title-a  todo-a

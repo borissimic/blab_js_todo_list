@@ -1,10 +1,10 @@
-import { TODO_LOCAL_STORAGE_KEY } from "./todo.constants.js";
-import { Todo } from "./todo.model.js";
+import { deleteTodo, updateTodoCompleted } from "./index.js";
 
 const _getTodoTemplate = (text, i) => `
 <input type="checkbox" name="checkbox-${i}" id="checkbox-${i}" />
 <label for="checkbox-${i}">${text}</label>
 <button>&#10005;</button>
+<button id = "edit_button">Edit me</button>
 `;
 
 const _createTodoElement = (text) => {
@@ -14,35 +14,23 @@ const _createTodoElement = (text) => {
   return divElement;
 };
 
-const _getAllTodos = (todoElements) =>
-  [...todoElements].reverse().map((todoElement) => {
-    const text = todoElement.querySelector("label").innerText;
-    const isDone = todoElement.querySelector("input").checked;
-    return new Todo(text, isDone);
-  });
-
 export const getTodoElements = () => [...document.querySelectorAll(".todo")];
 
-export function saveToLocalStorage() {
-  const todos = _getAllTodos(getTodoElements());
-  localStorage.setItem(TODO_LOCAL_STORAGE_KEY, JSON.stringify(todos));
-}
-
-export function addNewTodo({ text, isDone }) {
+export function addNewTodo({ id, text, isDone }) {
   const todoElement = _createTodoElement(text);
 
   const inputElement = todoElement.querySelector("input");
   inputElement.checked = isDone;
-  inputElement.addEventListener("change", () => saveToLocalStorage());
+  inputElement.addEventListener("change", () =>
+    updateTodoCompleted(id, inputElement.checked)
+  );
 
   todoElement.querySelector("button").addEventListener("click", () => {
     if (confirm("Jesi siguran?")) {
       todoElement.remove();
-      saveToLocalStorage();
+      deleteTodo(id);
     }
   });
 
   document.querySelector("main").prepend(todoElement);
-
-  saveToLocalStorage();
 }
